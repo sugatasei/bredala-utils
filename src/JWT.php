@@ -51,7 +51,7 @@ class JWT
         }
 
         $tks = explode('.', $jwt);
-        if (count($tks) != 3) {
+        if (count($tks) !== 3) {
             throw new JWTException("Wrong number of segments");
         }
 
@@ -74,7 +74,7 @@ class JWT
         }
 
         $sig = JWT::urlsafeB64Decode($cryptob64);
-        if ($sig != JWT::sign("$headb64.$bodyb64", $key, $header->alg)) {
+        if ($sig !== JWT::sign("$headb64.$bodyb64", $key, $header->alg)) {
             throw new JWTException("Signature verification failed");
         }
 
