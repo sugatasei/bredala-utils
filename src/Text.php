@@ -240,6 +240,33 @@ class Text
         return $clear_string;
     }
 
+    /**
+     * Protects HTML attribute values
+     *
+     * @param mixed $value
+     * @return string
+     */
+    public static function xss(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_numeric($value)) {
+            return (string) $value;
+        }
+
+        if (is_string($value)) {
+            return htmlspecialchars($value);
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        return htmlspecialchars(json_encode($value), ENT_QUOTES);
+    }
+
     // -------------------------------------------------------------------------
 }
 
