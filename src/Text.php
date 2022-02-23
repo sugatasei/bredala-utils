@@ -257,14 +257,24 @@ class Text
         }
 
         if (is_string($value)) {
-            return htmlspecialchars($value);
+            return self::htmlEncode($value);
         }
 
         if (is_bool($value)) {
             return $value ? '1' : '0';
         }
 
-        return htmlspecialchars(json_encode($value), ENT_QUOTES);
+        return self::htmlEncode(json_encode($value));
+    }
+
+    public static function htmlEncode(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+    }
+
+    public static function htmlDecode(string $value): string
+    {
+        return html_entity_decode($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 
     // -------------------------------------------------------------------------
