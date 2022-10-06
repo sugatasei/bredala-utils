@@ -202,4 +202,73 @@ class DateHelper
 
         return mktime(0, 0, 0, $MN, $Day, $annee);
     }
+
+    /**
+     * date french version
+     *
+     * @param string $format
+     * @param integer|null $timestamp
+     * @return string
+     */
+    public static function fr(string $format, ?int $timestamp = null): string
+    {
+        if ($timestamp === null) {
+            $timestamp = time();
+        }
+
+        $dt = date($format, $timestamp);
+
+        if (preg_match("/[^\\\][DlFM]/", ' ' . $format)) {
+            $dt = self::toFr($dt);
+        }
+
+        return $dt;
+    }
+
+    /**
+     * @param string $date
+     * @return string
+     */
+    public static function toFr(string $date): string
+    {
+        return strtr($date, [
+            'Wednesday' => 'Mercredi',
+            'September' => 'Septembre',
+            'December' => 'Décembre',
+            'February' => 'Février',
+            'Thursday' => 'Jeudi',
+            'November' => 'Novembre',
+            'Saturday' => 'Samedi',
+            'January' => 'Janvier',
+            'Tuesday' => 'Mardi',
+            'October' => 'Octobre',
+            'August' => 'Août',
+            'Sunday' => 'Dimanche',
+            'Monday' => 'Lundi',
+            'Friday' => 'Vendredi',
+            'April' => 'Avril',
+            'March' => 'Mars',
+            'July' => 'Juillet',
+            'June' => 'Juin',
+            'Aug' => 'Août',
+            'Apr' => 'Avril',
+            'Sun' => 'Dim.',
+            'Dec' => 'Déc.',
+            'Feb' => 'Févr.',
+            'Jan' => 'Janv.',
+            'Thu' => 'Jeu.',
+            'Jul' => 'Juil.',
+            'Jun' => 'Juin',
+            'Mon' => 'Lun.',
+            'May' => 'Mai',
+            'Tue' => 'Mar.',
+            'Mar' => 'Mars',
+            'Wed' => 'Mer.',
+            'Nov' => 'Nov.',
+            'Oct' => 'Oct.',
+            'Sat' => 'Sam.',
+            'Sep' => 'Sept.',
+            'Fri' => 'Ven.',
+        ]);
+    }
 }

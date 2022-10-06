@@ -5,103 +5,49 @@ namespace Bredala\Utils;
 /**
  * Help to work with texts
  */
-class Text
+class TextHelper
 {
-    private static $accents = [
-        "æ|ǽ" => "ae",
-        "œ" => "oe",
-        "Ä|À|Á|Â|Ã|Ä|Å|Ǻ|Ā|Ă|Ą|Ǎ" => "A",
-        "ä|à|á|â|ã|å|ǻ|ā|ă|ą|ǎ|ª" => "a",
-        "Ç|Ć|Ĉ|Ċ|Č" => "C",
-        "ç|ć|ĉ|ċ|č" => "c",
-        "Ð|Ď|Đ" => "D",
-        "ð|ď|đ" => "d",
-        "È|É|Ê|Ë|Ē|Ĕ|Ė|Ę|Ě" => "E",
-        "è|é|ê|ë|ē|ĕ|ė|ę|ě" => "e",
-        "Ĝ|Ğ|Ġ|Ģ" => "G",
-        "ĝ|ğ|ġ|ģ" => "g",
-        "Ĥ|Ħ" => "H",
-        "ĥ|ħ" => "h",
-        "Ì|Í|Î|Ï|Ĩ|Ī|Ĭ|Ǐ|Į|İ" => "I",
-        "ì|í|î|ï|ĩ|ī|ĭ|ǐ|į|ı" => "i",
-        "Ĵ" => "J",
-        "ĵ" => "j",
-        "Ķ" => "K",
-        "ķ" => "k",
-        "Ĺ|Ļ|Ľ|Ŀ|Ł" => "L",
-        "ĺ|ļ|ľ|ŀ|ł" => "l",
-        "Ñ|Ń|Ņ|Ň" => "N",
-        "ñ|ń|ņ|ň|ŉ" => "n",
-        "Ö|Ò|Ó|Ô|Õ|Ō|Ŏ|Ǒ|Ő|Ơ|Ø|Ǿ" => "O",
-        "ö|ò|ó|ô|õ|ō|ŏ|ǒ|ő|ơ|ø|ǿ|º" => "o",
-        "Ŕ|Ŗ|Ř" => "R",
-        "ŕ|ŗ|ř" => "r",
-        "Ś|Ŝ|Ş|Š" => "S",
-        "ś|ŝ|ş|š|ſ" => "s",
-        "Ţ|Ť|Ŧ" => "T",
-        "ţ|ť|ŧ" => "t",
-        "Ü|Ù|Ú|Û|Ũ|Ū|Ŭ|Ů|Ű|Ų|Ư|Ǔ|Ǖ|Ǘ|Ǚ|Ǜ" => "U",
-        "ü|ù|ú|û|ũ|ū|ŭ|ů|ű|ų|ư|ǔ|ǖ|ǘ|ǚ|ǜ" => "u",
-        "Ý|Ÿ|Ŷ" => "Y",
-        "ý|ÿ|ŷ" => "y",
-        "Ŵ" => "W",
-        "ŵ" => "w",
-        "Ź|Ż|Ž" => "Z",
-        "ź|ż|ž" => "z",
-        "Æ|Ǽ" => "AE",
-        "ß" => "ss",
-        "Ĳ" => "IJ",
-        "ĳ" => "ij",
-        "Œ" => "OE",
-        "ƒ" => "f",
-        "’" => "'"
-    ];
-
-    private static $accentTable = null;
+    private static array $accents = [];
 
     // -------------------------------------------------------------------------
 
     /**
-     * Convert Accented Characters to ASCII
+     * Remove accents
      *
      * @param string $str
      * @return string
      */
-    public static function convertAccents($str)
+    public static function removeAccents(string $str): string
     {
-        $accents = static::getAccentTable();
-        return preg_replace($accents['search'], $accents['replace'], $str);
+        return strtr($str, self::getAccents());
     }
 
-    protected static function getAccentTable(): array
+    /**
+     * Get accents table
+     *
+     * @return array
+     */
+    public static function getAccents(): array
     {
-        if (static::$accentTable === null) {
-
-            static::$accentTable = [
-                'search' => [],
-                'replace' => [],
-            ];
-
-            foreach (static::$accents as $k => $v) {
-                // Flag u => UTF-8
-                static::$accentTable['search'][] = '#' . $k . '#u';
-                static::$accentTable['replace'][] = $v;
-            }
+        if (!static::$accents) {
+            static::$accents = require __DIR__ . '/accents.php';
         }
 
-        return static::$accentTable;
+        return static::$accents;
     }
 
     // -------------------------------------------------------------------------
 
     /**
-     * @param string $str
-     * @param string $char
+     * Get an alias from a string that keeps only alphanumeric chars
+     *
+     * @param string $str Input string
+     * @param string $char character used to replace all non alphanumeric chars
      * @return string
      */
-    public static function normalize(string $str, string $char = "-"): string
+    public static function alias(string $str, string $char = "-"): string
     {
-        $str = self::convertAccents($str);
+        $str = self::removeAccents($str);
         $str = preg_replace("#[^a-z0-9]#i", $char, $str);
         $str = trim($str, $char);
         $str = preg_replace("#{$char}+#", $char, $str);
@@ -109,40 +55,48 @@ class Text
     }
 
     /**
+     * Transform a string into kebab-case
+     *
      * @param string $str
      * @return string
      */
     public static function toKebabCase(string $str): string
     {
-        $str = self::normalize($str, '-');
+        $str = self::alias($str, '-');
         $str = mb_strtolower($str);
         return $str;
     }
 
     /**
+     * Transform a string into snake_case
+     *
      * @param string $str
      * @return string
      */
     public static function toSnakeCase(string $str): string
     {
-        $str = self::normalize($str, '_');
+        $str = self::alias($str, '_');
         $str = mb_strtolower($str);
         return $str;
     }
 
     /**
+     * Transform a string into PascalCase
+     *
      * @param string $str
      * @return string
      */
     public static function toPascalCase(string $str): string
     {
         $char = '-';
-        $str = self::normalize($str, $char);
+        $str = self::alias($str, $char);
         $str = ucwords($str, $char);
         return str_replace($char, '', $str);
     }
 
     /**
+     * Transform a string into camelCase
+     *
      * @param string $str
      * @return string
      */
@@ -172,20 +126,8 @@ class Text
     // -------------------------------------------------------------------------
 
     /**
-     * SQL Like operator in PHP.
-     * Returns TRUE if match else FALSE.
+     * Make a string's first character uppercase. UTF-8 compatible.
      *
-     * @param   string $pattern
-     * @param   string $subject
-     * @return  bool
-     */
-    public static function like($pattern, $subject)
-    {
-        $pattern = str_replace('%', '.*', preg_quote($pattern));
-        return (bool) preg_match("/^{$pattern}$/i", $subject);
-    }
-
-    /**
      * @param string $str
      * @return string
      */
@@ -198,13 +140,15 @@ class Text
     }
 
     /**
+     * Make a string's last character uppercase. UTF-8 compatible.
+     *
      * @param string $str
      * @return string
      */
     public static function lcfirst(string $str): string
     {
         if ($str) {
-            $str[0] = mb_strtolower($str[0]);
+            $str = mb_strtolower(mb_substr($str, 0, 1)) . mb_substr($str, 1);
         }
         return $str;
     }
@@ -241,7 +185,7 @@ class Text
     }
 
     /**
-     * Protects HTML attribute values
+     * Protect HTML attribute values
      *
      * @param mixed $value
      * @return string
@@ -267,11 +211,23 @@ class Text
         return self::htmlEncode(json_encode($value));
     }
 
+    /**
+     * Convert special characters to HTML entities
+     *
+     * @param string $value
+     * @return string
+     */
     public static function htmlEncode(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 
+    /**
+     * Convert HTML entities to their corresponding characters
+     *
+     * @param string $value
+     * @return string
+     */
     public static function htmlDecode(string $value): string
     {
         return html_entity_decode($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
@@ -279,5 +235,3 @@ class Text
 
     // -------------------------------------------------------------------------
 }
-
-/* End of file */
