@@ -18,12 +18,9 @@ class Password
      * @param string $salt
      * @return $this
      */
-    public function setSalt(string $salt): Password
+    public function setSalt(?string $salt): Password
     {
-        if ($salt) {
-            $this->salt = $salt;
-        }
-
+        $this->salt = $salt ?: null;
         return $this;
     }
 
@@ -33,12 +30,9 @@ class Password
      * @param integer $cost
      * @return $this
      */
-    public function setCost(int $cost): Password
+    public function setCost(?int $cost): Password
     {
-        if ($cost) {
-            $this->cost = $cost;
-        }
-
+        $this->cost = $cost ?: null;
         return $this;
     }
 
@@ -76,6 +70,10 @@ class Password
      */
     public function verify(string $password, string $hash): bool
     {
+        if (!$password || !$hash) {
+            return false;
+        }
+
         return password_verify($password, $hash);
     }
 

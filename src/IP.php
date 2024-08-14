@@ -9,7 +9,6 @@ namespace Bredala\Utils;
  */
 class IP
 {
-
     private $ip_bin = '0';
     private $ip_hex = '0';
     private $ip_str = '0.0.0.0';

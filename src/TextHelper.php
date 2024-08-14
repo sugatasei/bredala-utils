@@ -9,34 +9,31 @@ class TextHelper
 {
     private static array $accents = [];
 
-    // -------------------------------------------------------------------------
-
     /**
      * Remove accents
      *
      * @param string $str
      * @return string
      */
-    public static function removeAccents(string $str): string
+    public static function removeAccents(string $str, string $table = 'all'): string
     {
-        return strtr($str, self::getAccents());
+        return strtr($str, self::getAccents($table));
     }
 
     /**
      * Get accents table
      *
+     * @param string $table
      * @return array
      */
-    public static function getAccents(): array
+    public static function getAccents(string $table): array
     {
-        if (!static::$accents) {
-            static::$accents = require __DIR__ . '/accents.php';
+        if (! isset(self::$accents[$table])) {
+            $filename = __DIR__ . '/accents_' . $table . '.php';
+            self::$accents[$table] = is_file($filename) ? require $filename : [];
         }
-
-        return static::$accents;
+        return self::$accents[$table];
     }
-
-    // -------------------------------------------------------------------------
 
     /**
      * Get an alias from a string that keeps only alphanumeric chars

@@ -54,6 +54,18 @@ class Hash
     // -------------------------------------------------------------------------
 
     /**
+     * Generates cryptographically secure pseudo-random string
+     *
+     * @param integer $length
+     * @return string
+     */
+    public static function random(int $length = 40): string
+    {
+        $bytes = random_bytes(ceil($length / 2));
+        return mb_substr(bin2hex($bytes), 0, $length);
+    }
+
+    /**
      * Generate a UUID (v4)
      * 36 characters : 32 hexadecimal numbers and 4 dashes
      * Exemple :  110e8400-e29b-11d4-a716-446655440000
@@ -64,17 +76,28 @@ class Hash
     public static function uuid(): string
     {
         $uid = uniqid();
+        $rand = self::random(19);
 
-        return vsprintf('%s-%s-%s%03x-%04x-%04x%04x%04x', [
+        return vsprintf('%s-%s-%s%s-%s-%s', [
             mb_substr($uid, 0, 8),
             mb_substr($uid, 8, 4),
             mb_substr($uid, 12),
-            mt_rand(0, 0xfff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
+            mb_substr($rand, 0, 3),
+            mb_substr($rand, 3, 4),
+            mb_substr($rand, 7)
         ]);
+    }
+
+    /**
+     * Generate an OTP number
+     *
+     * @param integer $len
+     * @return string
+     */
+    public static function otp(int $len = 6): string
+    {
+        $rand = mt_rand(1, 10 ** $len - 1);
+        return str_pad((string) $rand, $len, '0', STR_PAD_LEFT);
     }
 
     // -------------------------------------------------------------------------
