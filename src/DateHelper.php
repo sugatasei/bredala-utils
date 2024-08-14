@@ -7,29 +7,29 @@ class DateHelper
     /**
      * Days
      */
-    const SUNDAY = 0;
-    const MONDAY = 1;
-    const TUESDAY = 2;
+    const SUNDAY    = 0;
+    const MONDAY    = 1;
+    const TUESDAY   = 2;
     const WEDNESDAY = 3;
-    const THURSDAY = 4;
-    const FRIDAY = 5;
-    const SATURDAY = 6;
+    const THURSDAY  = 4;
+    const FRIDAY    = 5;
+    const SATURDAY  = 6;
 
     /**
      * Months
      */
-    const JANUARY = 1;
-    const FEBRUARY = 2;
-    const MARCH = 3;
-    const APRIL = 4;
-    const MAY = 5;
-    const JUNE = 6;
-    const JULY = 7;
-    const AUGUST = 8;
+    const JANUARY   = 1;
+    const FEBRUARY  = 2;
+    const MARCH     = 3;
+    const APRIL     = 4;
+    const MAY       = 5;
+    const JUNE      = 6;
+    const JULY      = 7;
+    const AUGUST    = 8;
     const SEPTEMBER = 9;
-    const OCTOBER = 10;
-    const NOVEMBER = 11;
-    const DECEMBER = 12;
+    const OCTOBER   = 10;
+    const NOVEMBER  = 11;
+    const DECEMBER  = 12;
 
     /**
      * Seasons
@@ -40,59 +40,12 @@ class DateHelper
     const WINTER = 3;
 
     /**
-     * SQL
+     * Formats
      */
     const DATETIME_ISO = 'c';
     const DATETIME_SQL = 'Y-m-d H:i:s';
-    const DATE_SQL = 'Y-m-d';
-    const TIME_SQL = 'H:i:s';
-
-    // -------------------------------------------------------------------------
-
-    /**
-     * @param string $value
-     * @return int
-     */
-    public static function toTimestamp(string $value): int
-    {
-        return strtotime($value);
-    }
-
-    /**
-     * @param int $value
-     * @return string
-     */
-    public static function toDatetimeIso(int $value): string
-    {
-        return date(self::DATETIME_ISO, $value);
-    }
-
-    /**
-     * @param int $value
-     * @return string
-     */
-    public static function toDatetimeSql(int $value): string
-    {
-        return date(self::DATETIME_SQL, $value);
-    }
-
-    /**
-     * @param int $value
-     * @return string
-     */
-    public static function toDateSql(int $value): string
-    {
-        return date(self::DATE_SQL, $value);
-    }
-
-    /**
-     * @param int $value
-     * @return string
-     */
-    public static function toTimeSql(int $value): string
-    {
-        return date(self::TIME_SQL, $value);
-    }
+    const DATE_SQL     = 'Y-m-d';
+    const TIME_SQL     = 'H:i:s';
 
     // -------------------------------------------------------------------------
 
@@ -271,4 +224,6 @@ class DateHelper
             'Fri' => 'Ven.',
         ]);
     }
+
+    // -------------------------------------------------------------------------
 }
