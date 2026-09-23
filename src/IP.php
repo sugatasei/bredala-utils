@@ -124,7 +124,7 @@ class IP
     protected function initBin(string $ip)
     {
         if (self::isIPBin($ip)) {
-            $this->v6     = self::isIPv6Bin($ip, false);
+            $this->v6     = self::isIPv6Bin($ip);
             $this->ip_bin = $ip;
             $this->ip_hex = self::binToHex($ip, $this->v6);
             $this->ip_str = self::binToStr($ip, $this->v6);
@@ -137,7 +137,7 @@ class IP
     protected function initHex(string $ip)
     {
         if (self::isIPHex($ip)) {
-            $this->v6     = self::isIPv6Hex($ip, false);
+            $this->v6     = self::isIPv6Hex($ip);
             $this->ip_bin = self::hexToBin($ip, $this->v6);
             $this->ip_hex = $ip;
             $this->ip_str = self::binToStr($this->ip_bin, $this->v6);
@@ -150,7 +150,7 @@ class IP
     protected function initStr(string $ip)
     {
         if (self::isIPStr($ip)) {
-            $this->v6     = self::isIPv6Str($ip, false);
+            $this->v6     = self::isIPv6Str($ip);
             $this->ip_bin = self::strToBin($ip, $this->v6);
             $this->ip_hex = self::binToHex($this->ip_bin, $this->v6);
             $this->ip_str = $ip;

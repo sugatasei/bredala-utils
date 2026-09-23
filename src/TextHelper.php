@@ -46,8 +46,12 @@ class TextHelper
     {
         $str = self::removeAccents($str);
         $str = preg_replace("#[^a-z0-9]#i", $char, $str);
-        $str = trim($str, $char);
-        $str = preg_replace("#{$char}+#", $char, $str);
+        if ($char === '') {
+            return $str;
+        }
+        $sep = preg_quote($char, '#');
+        $str = preg_replace("#(?:{$sep})+#", $char, $str);
+        $str = preg_replace("#^(?:{$sep})|(?:{$sep})$#", '', $str);
         return $str;
     }
 

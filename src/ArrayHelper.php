@@ -20,15 +20,24 @@ class ArrayHelper
         return count($a) === count($b) && !array_diff($a, $b);
     }
 
+    /**
+     * Return the unique values, optionally from a single column, compared strictly
+     * null, '' and [] are dropped
+     */
     public static function unique(array $rows, ?string $property = null): array
     {
-        if ($property) {
+        if ($property !== null) {
             $rows = array_column($rows, $property);
         }
 
-        return array_values(array_filter(array_unique($rows), function ($i) {
-            return $i !== null && $i !== '' && $i !== [];
-        }));
+        $out = [];
+        foreach ($rows as $value) {
+            if ($value !== null && $value !== '' && $value !== [] && !in_array($value, $out, true)) {
+                $out[] = $value;
+            }
+        }
+
+        return $out;
     }
 
     public static function rand(array $data)
