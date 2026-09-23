@@ -15,9 +15,36 @@ class ArrayHelper
         return json_decode(json_encode($object), true);
     }
 
+    /**
+     * Teste l'égalité de deux tableaux : mêmes clés, mêmes valeurs comparées
+     * strictement (===), sans tenir compte de l'ordre des clés, récursivement
+     *
+     * @param array $a
+     * @param array $b
+     * @return bool
+     */
     public static function equal(array $a, array $b): bool
     {
-        return count($a) === count($b) && !array_diff($a, $b);
+        if (count($a) !== count($b)) {
+            return false;
+        }
+
+        foreach ($a as $key => $value) {
+            if (!array_key_exists($key, $b)) {
+                return false;
+            }
+
+            $other = $b[$key];
+            if (is_array($value) && is_array($other)) {
+                if (!self::equal($value, $other)) {
+                    return false;
+                }
+            } elseif ($value !== $other) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

@@ -1,6 +1,6 @@
 ---
 name: bredala-utils
-description: How to correctly use the sugatasei/bredala-utils PHP helper collection (namespace Bredala\Utils — TextHelper, ArrayHelper, Date, Crypto, IP, Counter, Bench, File, Image) for slugs/case conversion/accent stripping/HTML escaping, array comparison and deduplication, date objects, French date formatting, SQL/ISO date conversion and season/leap-year maths, hashing and random tokens, bcrypt password hashing, symmetric encryption, IPv4/IPv6 conversion and storage, named counters, and timing marks. Use this whenever the project's composer.json requires sugatasei/bredala-utils, code imports from Bredala\Utils\*, or you're asked to slugify a string, strip accents, convert to camel/snake/kebab case, escape output, deduplicate or compare arrays, hash a password, generate a token/UUID/OTP, encrypt a value, store or convert an IP address, format a date in French, or time a code path in a PHP project that has this library available — even if the request is phrased generically without naming the library. Also check this before hand-rolling those helpers, since several have non-obvious or outright broken behavior (DecimalField-style type slips, IP binary/hex forms are not zero-padded, ArrayHelper::equal ignores keys) that plain PHP code would not share.
+description: How to correctly use the sugatasei/bredala-utils PHP helper collection (namespace Bredala\Utils — TextHelper, ArrayHelper, Date, Crypto, IP, Counter, Bench, File, Image) for slugs/case conversion/accent stripping/HTML escaping, array comparison and deduplication, date objects, French date formatting, SQL/ISO date conversion and season/leap-year maths, hashing and random tokens, bcrypt password hashing, symmetric encryption, IPv4/IPv6 conversion and storage, named counters, and timing marks. Use this whenever the project's composer.json requires sugatasei/bredala-utils, code imports from Bredala\Utils\*, or you're asked to slugify a string, strip accents, convert to camel/snake/kebab case, escape output, deduplicate or compare arrays, hash a password, generate a token/UUID/OTP, encrypt a value, store or convert an IP address, format a date in French, or time a code path in a PHP project that has this library available — even if the request is phrased generically without naming the library. Also check this before hand-rolling those helpers, since several have non-obvious or outright broken behavior (DecimalField-style type slips, IP binary/hex forms are not zero-padded) that plain PHP code would not share.
 ---
 
 # bredala-utils
@@ -14,7 +14,7 @@ Namespace: `Bredala\Utils\*`. Source lives in `vendor/sugatasei/bredala-utils/sr
 | Class | Use it for | Health |
 | ----- | ---------- | ------ |
 | `TextHelper` | slugs, case conversion, accent stripping, HTML escaping, splitting | good, two sharp edges |
-| `ArrayHelper` | object→array, deduplication, associative merge, random pick | `equal()` is unreliable |
+| `ArrayHelper` | object→array, deduplication, associative merge, random pick | `equal()` is strict but ignores key order |
 | `Date` | date object, French formatting, SQL/ISO conversion, leap years, seasons | good; throws on invalid dates, `modify()` mutates |
 | `Crypto` | hashes, random tokens, UUID, OTP, bcrypt passwords, AES-256-GCM encryption | good; `uuid()` is v7, `otp()` is 1–18 digits, `decrypt()` gives `''` on any failure |
 | `IP` | IPv4/IPv6 parsing, conversion, storage | good, **not zero-padded** |
@@ -126,7 +126,7 @@ ArrayHelper::mergeAssoc($a, $b);        // last wins, numeric keys preserved
 ArrayHelper::rand($array);              // one element, null when empty
 ```
 
-**Avoid `ArrayHelper::equal()`.** It compares only counts and `array_diff`, so it ignores keys, ignores order, compares as strings, and is fooled by duplicates: `equal(['a' => 1], ['b' => 1])` and `equal([1, 1], [1, 2])` both return `true`. Use `==` for loose key-aware comparison or `===` for strict.
+**`ArrayHelper::equal()` sits between `==` and `===`.** Values are compared strictly (`equal([1], ['1'])` is `false`) but key order is ignored (`equal(['a' => 1, 'b' => 2], ['b' => 2, 'a' => 1])` is `true`), recursively for nested arrays; objects compare by identity. For a list the key is the position, so `equal([1, 2], [2, 1])` is `false` — sort first for an order-insensitive list comparison.
 
 ### Dates
 
@@ -181,7 +181,7 @@ Both are global static state with no flush. Namespace your keys, and expect them
 - **`Crypto::encrypt()` is non-deterministic.** Same input, different ciphertext each call; `decrypt()` gives `''` on every failure, and old CBC-era ciphertexts no longer decrypt.
 - **`Crypto::hash()` is not for passwords** — use `passwordHash()`.
 - **`Crypto::otp()` throws `ValueError` outside 1–18 digits.**
-- **`ArrayHelper::equal()` ignores keys and is fooled by duplicates.** Use `==`/`===`.
+- **`ArrayHelper::equal()` is positional on lists.** `[1, 2]` and `[2, 1]` differ; sort both sides first if order doesn't matter.
 - **`IP`'s bin/hex forms are unpadded**, and the static converters raise `TypeError` on v6 data without `$v6 = true`.
 - **`Date` throws on invalid dates and `Date::modify()` mutates the object.**
 - **Invalid input is usually silent elsewhere.** `IP` falls back to `0.0.0.0`, `TextHelper::getAccents('typo')` returns `[]` (so accents just aren't stripped), `Crypto::hash($s, 50)` falls back to sha1, `StringField`-style filters return `null`. None of them raise.

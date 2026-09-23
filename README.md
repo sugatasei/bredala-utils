@@ -18,7 +18,7 @@ apt install php-imagick
 
 ## Claude Code
 
-Ce package fournit un skill Claude Code dans [`skills/bredala-utils/`](skills/bredala-utils/) qui documente les patterns d'usage et les pièges de la librairie (formes binaires d'`IP` non zéro-remplies, `ArrayHelper::equal()` qui ignore les clés, etc.).
+Ce package fournit un skill Claude Code dans [`skills/bredala-utils/`](skills/bredala-utils/) qui documente les patterns d'usage et les pièges de la librairie (formes binaires d'`IP` non zéro-remplies, etc.).
 
 Dans un projet qui dépend de `sugatasei/bredala-utils`, copie-le une fois dans `.claude/skills/` après `composer install` pour que Claude Code le charge automatiquement (le nom du dossier doit correspondre au `name` déclaré dans `SKILL.md`) :
 
@@ -102,14 +102,14 @@ Les quatre conversions passent par `alias()` : ce sont donc des **constructeurs 
 `Bredala\Utils\ArrayHelper`
 
 - `toArray($object): array` Convertit récursivement un objet en tableau.
-- `equal(array $a, array $b): bool` **Peu fiable**, voir ci-dessous.
+- `equal(array $a, array $b): bool` Mêmes clés et mêmes valeurs, strictement, ordre des clés ignoré.
 - `unique(array $rows, ?string $property = null): array` Valeurs distinctes, éventuellement d'une colonne.
 - `rand(array $data)` Un élément au hasard, `null` si le tableau est vide.
 - `mergeAssoc(array ...$arrays): array` Fusion associative, le dernier gagne.
 
 `toArray()` ne voit que les propriétés publiques et hérite des limites de `json_encode` : une ressource ou un `NAN` fait échouer l'encodage, et le type de retour `: array` transforme cela en `TypeError`.
 
-**Éviter `equal()`.** Le test est `count($a) === count($b) && !array_diff($a, $b)`, ce qui **ignore les clés** (`equal(['a' => 1], ['b' => 1])` vaut `true`), ignore l'ordre, compare les valeurs **comme des chaînes**, et se fait tromper par les doublons dans les deux sens (`equal([1, 1], [1, 2])` vaut `true`). Utiliser `==` pour une comparaison souple tenant compte des clés, `===` pour une comparaison stricte.
+`equal()` se situe entre `==` et `===` : elle compare les valeurs **strictement** comme `===` (`equal([1], ['1'])` vaut `false`), mais **ignore l'ordre des clés** comme `==` (`equal(['a' => 1, 'b' => 2], ['b' => 2, 'a' => 1])` vaut `true`). Les sous-tableaux sont comparés récursivement selon la même règle, les objets par identité. Dans une liste, la clé est la position : `equal([1, 2], [2, 1])` vaut `false`. Les clés suivent la normalisation de PHP (`'1'` et `1` sont la même clé).
 
 `unique()` écarte `null`, `''` et `[]` mais conserve `0` et `false`. Elle compare **strictement** (`===`) : `1`, `'1'` et `1.0` restent trois valeurs distinctes, et deux tableaux ne sont fusionnés que s'ils sont identiques. Elle ignore silencieusement les lignes dépourvues de la colonne. Seul `null` signifie « pas de colonne » : `''` et `'0'` sont des noms de colonne valides. La comparaison est en O(n²), à éviter sur de très gros volumes.
 

@@ -24,7 +24,7 @@ The four case converters all call `alias()` first, so they also strip accents an
 | Intent | Method |
 | ------ | ------ |
 | Object → nested array (json round trip) | `toArray($object): array` |
-| Same values, ignoring keys and order (**unreliable**) | `equal(array $a, array $b): bool` |
+| Same keys and strictly equal values, key order ignored, recursive | `equal(array $a, array $b): bool` |
 | Distinct values, optionally of one column | `unique(array $rows, ?string $property = null): array` |
 | One random element, `null` if empty | `rand(array $data)` |
 | Associative merge, last wins, keys preserved | `mergeAssoc(array ...$arrays): array` |

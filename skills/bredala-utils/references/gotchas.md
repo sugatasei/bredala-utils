@@ -42,7 +42,7 @@ Things the method names don't tell you. Grouped by class. Every item is pinned b
 
 ## ArrayHelper
 
-- **`equal()` is not a reliable array comparison.** It checks only `count($a) === count($b) && !array_diff($a, $b)`, which means it **ignores keys** (`equal(['a' => 1], ['b' => 1])` is `true`), ignores order (`equal([1, 2], [2, 1])` is `true`), compares values **as strings** (`equal([1], ['1'])` is `true`), and is **fooled by duplicates** in both directions (`equal([1, 1], [1, 2])` and `equal([1, 1, 2], [1, 2, 2])` are both `true`). Use `==` for a key-aware loose comparison, `===` for strict, or sort and compare for multiset equality.
+- **`equal()` is strict but ignores key order.** It requires the same keys with `===`-equal values, in any key order, recursing into nested arrays; objects compare by identity. `equal([1], ['1'])` and `equal([0], [false])` are `false`, `equal(['a' => 1, 'b' => 2], ['b' => 2, 'a' => 1])` is `true`. On a list the key is the position, so `equal([1, 2], [2, 1])` is `false` — sort both sides first for multiset equality. Keys go through PHP's own normalization, so `['1' => x]` and `[1 => x]` are equal.
 - **`unique()` compares strictly (`===`).** `1`, `'1'` and `1.0` are three distinct values, as are `0`, `false` and `'0'`; arrays are deduplicated only when identical. If you relied on `1` and `'1'` collapsing, normalize the types first.
 - **`unique()` drops `null`, `''` and `[]` but keeps `0` and `false`.** The filter is a strict comparison against those three values only, so a column of `0` sentinels survives while a column of empty strings is silently emptied.
 - **`unique()` is O(n²)** (`in_array` against the values kept so far). Fine for typical lists; avoid it on very large arrays.

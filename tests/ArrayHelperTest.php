@@ -58,21 +58,26 @@ class ArrayHelperTest extends TestCase
         self::assertTrue(ArrayHelper::equal([], []));
     }
 
-    public function testEqualIgnoresOrder()
+    public function testEqualIgnoresKeyOrder()
     {
-        self::assertTrue(ArrayHelper::equal([1, 2], [2, 1]));
+        self::assertTrue(ArrayHelper::equal(['a' => 1, 'b' => 2], ['b' => 2, 'a' => 1]));
     }
 
-    public function testEqualIgnoresKeys()
+    public function testEqualComparesKeys()
     {
-        // array_diff() compares values only, so two arrays with the same values
-        // under different keys are reported equal.
-        self::assertTrue(ArrayHelper::equal(['a' => 1], ['b' => 1]));
+        self::assertFalse(ArrayHelper::equal(['a' => 1], ['b' => 1]));
+    }
+
+    public function testEqualOnListsIsPositional()
+    {
+        // In a list the key is the position, so [1, 2] and [2, 1] differ.
+        self::assertFalse(ArrayHelper::equal([1, 2], [2, 1]));
     }
 
     public function testEqualRejectsDifferentCounts()
     {
         self::assertFalse(ArrayHelper::equal([1, 2], [1, 2, 3]));
+        self::assertFalse(ArrayHelper::equal([1, 2, 3], [1, 2]));
     }
 
     public function testEqualRejectsDifferentValues()
@@ -80,19 +85,48 @@ class ArrayHelperTest extends TestCase
         self::assertFalse(ArrayHelper::equal([1, 2], [2, 3]));
     }
 
-    public function testEqualComparesValuesAsStrings()
+    public function testEqualIsStrict()
     {
-        // array_diff() casts to string, so 1 and '1' are the same value.
-        self::assertTrue(ArrayHelper::equal([1], ['1']));
+        self::assertFalse(ArrayHelper::equal([1], ['1']));
+        self::assertFalse(ArrayHelper::equal([1], [1.0]));
+        self::assertFalse(ArrayHelper::equal([0], [false]));
+        self::assertFalse(ArrayHelper::equal([null], ['']));
+        self::assertFalse(ArrayHelper::equal(['1' => 'a'], ['01' => 'a']));
     }
 
-    public function testEqualIsFooledByDuplicates()
+    public function testEqualNormalizesIntegerStringKeys()
     {
-        // The check is 'same count AND no value of $a missing from $b'. Duplicates
-        // defeat it in both directions: these pairs hold different multisets yet
-        // are reported equal. Use == or a sorted comparison when that matters.
-        self::assertTrue(ArrayHelper::equal([1, 1], [1, 2]));
-        self::assertTrue(ArrayHelper::equal([1, 1, 2], [1, 2, 2]));
+        // PHP itself casts the key '1' to the int 1.
+        self::assertTrue(ArrayHelper::equal(['1' => 'a'], [1 => 'a']));
+    }
+
+    public function testEqualHandlesNullValues()
+    {
+        self::assertTrue(ArrayHelper::equal(['a' => null], ['a' => null]));
+        self::assertFalse(ArrayHelper::equal(['a' => null], ['b' => null]));
+    }
+
+    public function testEqualRejectsDuplicates()
+    {
+        self::assertFalse(ArrayHelper::equal([1, 1], [1, 2]));
+        self::assertFalse(ArrayHelper::equal([1, 1, 2], [1, 2, 2]));
+    }
+
+    public function testEqualIsRecursive()
+    {
+        self::assertTrue(ArrayHelper::equal(
+            ['x' => ['a' => 1, 'b' => [2, 3]]],
+            ['x' => ['b' => [2, 3], 'a' => 1]],
+        ));
+        self::assertFalse(ArrayHelper::equal(['x' => ['a' => 1]], ['x' => ['a' => '1']]));
+        self::assertFalse(ArrayHelper::equal(['x' => [1]], ['x' => 1]));
+    }
+
+    public function testEqualComparesObjectsByIdentity()
+    {
+        $o = new \stdClass();
+        self::assertTrue(ArrayHelper::equal([$o], [$o]));
+        self::assertFalse(ArrayHelper::equal([$o], [new \stdClass()]));
     }
 
     // -------------------------------------------------------------------------
